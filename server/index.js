@@ -5,8 +5,10 @@ const io = require("socket.io")(http, { cors: { origin: "*" } });
 const PORT = 3001; 
 let users = {}; 
  
-io.on("connection", (socket) =
-  console.log("Yeni bağlantı:", socket.id); 
+io.on("connection", (socket) => {
+  console.log("Yeni bağlantı:", socket.id);
+});
+
   socket.on("join-room", (room, username) =
     socket.join(room); 
     users[socket.id] = { username, room }; 
