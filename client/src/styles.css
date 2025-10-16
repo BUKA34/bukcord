@@ -1,14 +1,20 @@
 :root { --bg:#0f1720; --panel:#0b1220; --accent:#5865F2; --muted:#94a3b8; --card:#0c1116; }
 body,html,#root { height:100%; margin:0; font-family:Inter, Arial, sans-serif; background:var(--bg); color:#e6eef8; }
-.app { display:grid; grid-template-columns:220px 1fr 300px; gap:12px; padding:12px; height:100vh; box-sizing:border-box; }
+.app { display:grid; grid-template-columns:260px 1fr 320px; gap:12px; padding:12px; height:100vh; box-sizing:border-box; }
 .sidebar { background:var(--panel); padding:12px; border-radius:8px; display:flex; flex-direction:column; justify-content:space-between; }
-.room-list h3 { margin:0 0 8px 0; color:var(--muted); }
+.room-list h3 { margin:0 0 8px 0; color:var(--muted); letter-spacing:1px; }
 .room-list ul { list-style:none; padding:0; margin:0; }
-.room-list li { padding:8px; border-radius:6px; cursor:pointer; margin-bottom:6px; background:transparent; }
-.room-list li.active { background:linear-gradient(90deg, rgba(88,101,242,0.12), rgba(88,101,242,0.06)); border-left:4px solid var(--accent); }
+.room-list li { padding:12px; border-radius:6px; cursor:pointer; margin-bottom:8px; background:transparent; color:#cfe8ff; }
+.room-list li .room-title { font-weight:700; font-size:15px; letter-spacing:0.6px; }
+.room-list li .room-username { font-size:12px; color:#9fb0c8; margin-left:6px; }
+.room-list li.active { background:linear-gradient(90deg, rgba(88,101,242,0.12), rgba(88,101,242,0.04)); border-left:4px solid var(--accent); }
+.room-users { display:flex; gap:6px; margin-top:8px; }
+.room-user-dot .dot { width:12px; height:12px; border-radius:50%; background:#274055; display:inline-block; box-shadow:none; transition: box-shadow 0.12s ease, background 0.12s ease; }
+.room-user-dot .dot.on { box-shadow: 0 0 8px 2px rgba(88,101,242,0.9); background: #9fd3ff; }
+
 .mebox { margin-top:12px; display:flex; flex-direction:column; gap:8px; }
-.mebox input { padding:8px; border-radius:6px; border:1px solid #1f2937; background:#071023; color:#fff; }
-.mebox button { padding:8px; border-radius:6px; border:none; background:var(--accent); color:#fff; cursor:pointer; }
+.mebox input { padding:10px; border-radius:6px; border:1px solid #1f2937; background:#071023; color:#fff; }
+.mebox button { padding:10px; border-radius:6px; border:none; background:var(--accent); color:#fff; cursor:pointer; }
 
 .main { background:var(--card); border-radius:8px; padding:12px; display:flex; flex-direction:column; }
 .chat-area { display:flex; flex-direction:column; height:100%; }
@@ -20,6 +26,8 @@ body,html,#root { height:100%; margin:0; font-family:Inter, Arial, sans-serif; b
 
 .right { background:var(--panel); padding:12px; border-radius:8px; }
 .user-panel ul { list-style:none; padding:0; margin:0; }
-.user-panel li { padding:8px; background:#09121a; border-radius:6px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center; }
+.user-panel li { padding:10px; background:#09121a; border-radius:6px; margin-bottom:8px; display:flex; flex-direction:column; gap:8px; }
 .user-panel .urow { display:flex; gap:8px; align-items:center; width:100%; }
 .user-panel .uname { flex:1; word-break:break-word; color:#cfe8ff; }
+.speaking-ind { width:12px; height:12px; border-radius:50%; background:transparent; border:1px solid #274055; margin-left:8px; transition: box-shadow 0.12s ease, background 0.12s ease; }
+.speaking-ind.on { box-shadow: 0 0 8px 2px rgba(88,101,242,0.9); background:#9fd3ff; border: none; }
