@@ -1,6 +1,14 @@
 import React from "react";
 
-export default function UserPanel({ users, myId, onVolumeChange, speakingMap }) {
+/*
+ props:
+  - users: [{id, username}]
+  - myId: socket.id
+  - onVolumeChange(id, value)
+  - speakingMap: { id: boolean }
+*/
+
+export default function UserPanel({ users = [], myId, onVolumeChange, speakingMap = {} }) {
   return (
     <div className="user-panel">
       <h4>Katılanlar</h4>
@@ -9,7 +17,7 @@ export default function UserPanel({ users, myId, onVolumeChange, speakingMap }) 
           <li key={u.id} className={u.id === myId ? "me" : ""}>
             <div className="urow">
               <span className="uname">{u.username}</span>
-              <div className={`speaking-ind ${speakingMap[u.id] ? "on" : ""}`} title={speakingMap[u.id] ? "Konuşuyor" : ""}/>
+              <div className={`speaking-ind ${speakingMap[u.id] ? "on" : ""}`} />
             </div>
             <input
               type="range"
