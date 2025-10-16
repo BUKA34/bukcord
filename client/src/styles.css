@@ -1,0 +1,25 @@
+:root { --bg:#0f1720; --panel:#0b1220; --accent:#5865F2; --muted:#94a3b8; --card:#0c1116; }
+body,html,#root { height:100%; margin:0; font-family:Inter, Arial, sans-serif; background:var(--bg); color:#e6eef8; }
+.app { display:grid; grid-template-columns:220px 1fr 300px; gap:12px; padding:12px; height:100vh; box-sizing:border-box; }
+.sidebar { background:var(--panel); padding:12px; border-radius:8px; display:flex; flex-direction:column; justify-content:space-between; }
+.room-list h3 { margin:0 0 8px 0; color:var(--muted); }
+.room-list ul { list-style:none; padding:0; margin:0; }
+.room-list li { padding:8px; border-radius:6px; cursor:pointer; margin-bottom:6px; background:transparent; }
+.room-list li.active { background:linear-gradient(90deg, rgba(88,101,242,0.12), rgba(88,101,242,0.06)); border-left:4px solid var(--accent); }
+.mebox { margin-top:12px; display:flex; flex-direction:column; gap:8px; }
+.mebox input { padding:8px; border-radius:6px; border:1px solid #1f2937; background:#071023; color:#fff; }
+.mebox button { padding:8px; border-radius:6px; border:none; background:var(--accent); color:#fff; cursor:pointer; }
+
+.main { background:var(--card); border-radius:8px; padding:12px; display:flex; flex-direction:column; }
+.chat-area { display:flex; flex-direction:column; height:100%; }
+.messages { flex:1; overflow:auto; padding:8px; border-radius:6px; background:#071023; }
+.msg { padding:6px 8px; margin-bottom:6px; border-radius:6px; background:rgba(255,255,255,0.02); }
+.chat-input { display:flex; gap:8px; margin-top:8px; }
+.chat-input input { flex:1; padding:8px; border-radius:6px; border:1px solid #1f2937; background:#071023; color:#fff; }
+.chat-input button { padding:8px 12px; border-radius:6px; background:var(--accent); color:#fff; border:none; }
+
+.right { background:var(--panel); padding:12px; border-radius:8px; }
+.user-panel ul { list-style:none; padding:0; margin:0; }
+.user-panel li { padding:8px; background:#09121a; border-radius:6px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center; }
+.user-panel .urow { display:flex; gap:8px; align-items:center; width:100%; }
+.user-panel .uname { flex:1; word-break:break-word; color:#cfe8ff; }
