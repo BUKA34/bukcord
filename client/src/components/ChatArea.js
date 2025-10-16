@@ -1,34 +1,35 @@
 import React, { useEffect, useRef, useState } from "react";
 import { socket } from "../socket";
 
-export default function ChatArea({ room }) {
+export default function ChatArea({ room, myName }) {
   const [messages, setMessages] = useState([]);
   const [text, setText] = useState("");
   const messagesRef = useRef();
 
   useEffect(() => {
     if (!room) return;
-    // request initial messages happens on join; but ensure listener
     const initHandler = (msgs) => setMessages(msgs || []);
     const newHandler = (m) => setMessages(prev => [...prev, m]);
 
     socket.on("init-messages", initHandler);
     socket.on("new-message", newHandler);
 
+    // request server messages for current room (server already emits init on join)
+    // cleanup
     return () => {
       socket.off("init-messages", initHandler);
       socket.off("new-message", newHandler);
+      setMessages([]);
     };
   }, [room]);
 
   useEffect(() => {
-    // scroll to bottom
     if (messagesRef.current) messagesRef.current.scrollTop = messagesRef.current.scrollHeight;
   }, [messages]);
 
   const send = () => {
     if (!text.trim()) return;
-    socket.emit("send-message", { room, username: socket.username || "anon", text, ts: Date.now() });
+    socket.emit("send-message", { room, username: myName || "anon", text, ts: Date.now() });
     setText("");
   };
 
