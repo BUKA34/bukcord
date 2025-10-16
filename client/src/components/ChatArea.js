@@ -14,8 +14,7 @@ export default function ChatArea({ room, myName }) {
     socket.on("init-messages", initHandler);
     socket.on("new-message", newHandler);
 
-    // request server messages for current room (server already emits init on join)
-    // cleanup
+    // cleanup when switching rooms
     return () => {
       socket.off("init-messages", initHandler);
       socket.off("new-message", newHandler);
@@ -29,7 +28,8 @@ export default function ChatArea({ room, myName }) {
 
   const send = () => {
     if (!text.trim()) return;
-    socket.emit("send-message", { room, username: myName || "anon", text, ts: Date.now() });
+    const payload = { room, username: myName || "anon", text, ts: Date.now() };
+    socket.emit("send-message", payload);
     setText("");
   };
 
@@ -38,12 +38,19 @@ export default function ChatArea({ room, myName }) {
       <div className="messages" ref={messagesRef}>
         {messages.map((m, i) => (
           <div key={i} className="msg">
-            <b>{m.username}:</b> <span>{m.text}</span>
+            <span className="msg-user">{m.username}</span>
+            <span className="msg-text">{m.text}</span>
           </div>
         ))}
       </div>
+
       <div className="chat-input">
-        <input value={text} onChange={e => setText(e.target.value)} placeholder="Mesaj yaz..." onKeyDown={e => e.key === "Enter" && send()} />
+        <input
+          value={text}
+          onChange={e => setText(e.target.value)}
+          placeholder={`#${room} kanalına mesaj gönder...`}
+          onKeyDown={e => e.key === "Enter" && send()}
+        />
         <button onClick={send}>Gönder</button>
       </div>
     </div>
