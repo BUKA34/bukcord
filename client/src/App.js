@@ -4,48 +4,47 @@ import io from "socket.io-client";
 const socket = io("https://bukcord.onrender.com"); // Render backend adresi
 
 function App() {
-  const [room, setRoom] = useState("Lobby");
-  const [joined, setJoined] = useState(false);
   const [username, setUsername] = useState("");
-  const [peers, setPeers] = useState({});
-  const localVideoRef = useRef(null);
+  const [room, setRoom] = useState("Oda 1");
+  const [joined, setJoined] = useState(false);
+  const [users, setUsers] = useState([]);
   const peerConnections = useRef({});
   const localStream = useRef(null);
 
-  // Odaya katılma
+  // Odaya katıl
   const joinRoom = async () => {
-    if (!username) return alert("Lütfen kullanıcı adını gir!");
+    if (!username) return alert("Kullanıcı adını gir!");
     setJoined(true);
 
+    // Sadece mikrofon al
     localStream.current = await navigator.mediaDevices.getUserMedia({
-      video: true,
       audio: true,
+      video: false,
     });
-    localVideoRef.current.srcObject = localStream.current;
 
     socket.emit("join-room", room, username);
   };
 
-  // WebRTC sinyalleri
   useEffect(() => {
+    // Yeni biri katıldığında bağlantı başlat
     socket.on("user-joined", async (userId) => {
       const peer = new RTCPeerConnection();
-      localStream.current.getTracks().forEach((track) => peer.addTrack(track, localStream.current));
       peerConnections.current[userId] = peer;
 
+      localStream.current.getTracks().forEach((track) => peer.addTrack(track, localStream.current));
+
       peer.onicecandidate = (e) => {
-        if (e.candidate) {
-          socket.emit("signal", { to: userId, signal: { candidate: e.candidate } });
-        }
+        if (e.candidate) socket.emit("signal", { to: userId, signal: { candidate: e.candidate } });
       };
 
       peer.ontrack = (e) => {
-        const video = document.createElement("video");
-        video.srcObject = e.streams[0];
-        video.autoplay = true;
-        video.playsInline = true;
-        video.className = "rounded-xl w-1/3 p-2";
-        document.getElementById("remoteVideos").appendChild(video);
+        const audio = document.createElement("audio");
+        audio.srcObject = e.streams[0];
+        audio.autoplay = true;
+        audio.controls = false;
+        audio.id = `audio-${userId}`;
+        document.getElementById("audioContainer").appendChild(audio);
+        setUsers((prev) => [...new Set([...prev, userId])]);
       };
 
       const offer = await peer.createOffer();
@@ -53,26 +52,28 @@ function App() {
       socket.emit("signal", { to: userId, signal: { sdp: offer } });
     });
 
+    // Sinyal işleme
     socket.on("signal", async (data) => {
       let peer = peerConnections.current[data.from];
       if (!peer) {
         peer = new RTCPeerConnection();
-        localStream.current.getTracks().forEach((track) => peer.addTrack(track, localStream.current));
         peerConnections.current[data.from] = peer;
 
+        localStream.current.getTracks().forEach((track) => peer.addTrack(track, localStream.current));
+
         peer.onicecandidate = (e) => {
-          if (e.candidate) {
+          if (e.candidate)
             socket.emit("signal", { to: data.from, signal: { candidate: e.candidate } });
-          }
         };
 
         peer.ontrack = (e) => {
-          const video = document.createElement("video");
-          video.srcObject = e.streams[0];
-          video.autoplay = true;
-          video.playsInline = true;
-          video.className = "rounded-xl w-1/3 p-2";
-          document.getElementById("remoteVideos").appendChild(video);
+          const audio = document.createElement("audio");
+          audio.srcObject = e.streams[0];
+          audio.autoplay = true;
+          audio.controls = false;
+          audio.id = `audio-${data.from}`;
+          document.getElementById("audioContainer").appendChild(audio);
+          setUsers((prev) => [...new Set([...prev, data.from])]);
         };
       }
 
@@ -93,56 +94,75 @@ function App() {
         peerConnections.current[userId].close();
         delete peerConnections.current[userId];
       }
+      document.getElementById(`audio-${userId}`)?.remove();
+      setUsers((prev) => prev.filter((u) => u !== userId));
     });
   }, []);
 
-  const shareScreen = async () => {
-    const screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
-    const screenTrack = screenStream.getTracks()[0];
-
-    for (const peer of Object.values(peerConnections.current)) {
-      const sender = peer.getSenders().find((s) => s.track.kind === "video");
-      sender.replaceTrack(screenTrack);
-    }
-
-    screenTrack.onended = () => {
-      for (const peer of Object.values(peerConnections.current)) {
-        const sender = peer.getSenders().find((s) => s.track.kind === "video");
-        sender.replaceTrack(localStream.current.getTracks().find((t) => t.kind === "video"));
-      }
-    };
+  // Ses seviyesini ayarla
+  const changeVolume = (userId, volume) => {
+    const audio = document.getElementById(`audio-${userId}`);
+    if (audio) audio.volume = volume;
   };
 
   return (
     <div style={{ backgroundColor: "#0d1117", color: "#fff", height: "100vh", padding: "20px" }}>
       {!joined ? (
         <div style={{ textAlign: "center", marginTop: "20%" }}>
-          <h1>🎧 Bukcord Dark Mode</h1>
+          <h1>🔊 Bukcord Sesli Sohbet</h1>
           <input
             type="text"
-            placeholder="Kullanıcı adını gir..."
+            placeholder="Kullanıcı adın..."
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             style={{ padding: "8px", borderRadius: "8px", marginRight: "10px" }}
           />
+          <select
+            value={room}
+            onChange={(e) => setRoom(e.target.value)}
+            style={{ padding: "8px", borderRadius: "8px", marginRight: "10px" }}
+          >
+            <option>Oda 1</option>
+            <option>Oda 2</option>
+            <option>Oda 3</option>
+            <option>Oda 4</option>
+          </select>
           <button
             onClick={joinRoom}
             style={{ padding: "8px 12px", background: "#238636", borderRadius: "8px", color: "#fff" }}
           >
-            Odaya Katıl
+            Katıl
           </button>
         </div>
       ) : (
         <div style={{ textAlign: "center" }}>
           <h2>{room} odasındasın</h2>
-          <video ref={localVideoRef} autoPlay playsInline muted className="rounded-xl w-1/3 p-2" />
-          <div id="remoteVideos" style={{ display: "flex", justifyContent: "center", flexWrap: "wrap" }}></div>
-          <button
-            onClick={shareScreen}
-            style={{ marginTop: "20px", background: "#30363d", color: "#fff", padding: "10px 16px", borderRadius: "8px" }}
-          >
-            Ekran Paylaş
-          </button>
+          <p>Bağlı kullanıcılar:</p>
+          <div style={{ display: "flex", justifyContent: "center", gap: "20px", flexWrap: "wrap" }}>
+            {users.map((id) => (
+              <div
+                key={id}
+                style={{
+                  background: "#161b22",
+                  padding: "10px",
+                  borderRadius: "10px",
+                  width: "160px",
+                }}
+              >
+                <p>{id}</p>
+                <input
+                  type="range"
+                  min="0"
+                  max="1"
+                  step="0.01"
+                  defaultValue="1"
+                  onChange={(e) => changeVolume(id, e.target.value)}
+                  style={{ width: "100%" }}
+                />
+              </div>
+            ))}
+          </div>
+          <div id="audioContainer" />
         </div>
       )}
     </div>
